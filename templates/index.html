@@ -1,0 +1,343 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        @font-face {
+            font-family: CrimsonFont;
+            src: url('https://fonts.googleapis.com/css?family=Crimson+Text:400');
+        }
+        .no-top {
+            margin-top: 0px;
+        }
+        .no-bottom {
+            margin-bottom: 0px;
+        }
+        .cfont {
+            font-family: CrimsonFont,serif;
+        }
+        .data-label {
+            text-align: right;
+            font-size: 2em;
+        }
+        .data-value {
+            text-align: left;
+            font-size: 2em;
+        }
+        .sample-row {
+            background-color: #ececec;
+        }
+        .positive-row {
+            background-color: lightgoldenrodyellow;
+        }
+        .recovery-row {
+            background-color: #bbf5bb;
+        }
+        .death-row {
+            background-color: lightpink;
+        }
+        .row {
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+            <form class="border border-light p-5">
+
+                <p class="h1 mb-4 text-center cfont no-top no-bottom">Trinidad & Tobago</p>
+                <p class="h2 mb-4 text-center cfont no-top">COVID-19 Report #<span id="report-number">__</span></p>
+                <p class="h4 text-center cfont no-top no-bottom" id="report-date"></p>
+                <hr>
+                <div class="row sample-row">
+                    <div class="col-xs-6 data-label">Sampled:</div>
+                    <div id="sample-value" class="col-xs-6 data-value">-----</div>
+                </div>
+                <div class="row positive-row">
+                    <div class="col-xs-6 data-label">Positive:</div>
+                    <div id="positive-value" class="col-xs-6 data-value">-----</div>
+                </div>
+                <div class="row death-row">
+                    <div class="col-xs-6 data-label">Deaths:</div>
+                    <div id="death-value" class="col-xs-6 data-value">-----</div>
+                </div>
+                <div class="row recovery-row">
+                    <div class="col-xs-6 data-label">Recovered:</div>
+                    <div id="recovered-value" class="col-xs-6 data-value">-----</div>
+                </div>
+                <hr>
+                <!-- graphs -->
+            </form>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row no-gutter">
+            <div class="col-md-4">
+                <canvas id="MortalityGraph" width="400" height="400" style="background-color: rgb(241, 241, 241);"></canvas>
+            </div>
+
+            <div class="col-md-4">
+                <canvas id="PositivesVsSampled" width="400" height="400" style="background-color: rgb(241, 241, 241);"></canvas>
+            </div>
+
+            <div class="col-md-4">
+                <canvas id="PositivesVsTime" width="400" height="400" style="background-color: rgb(241, 241, 241);"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
+
+    <script>
+        function load_charts(data) {
+            let keys = Object.keys(data);
+            positivesVSsampled_dataset = [];
+            positivesVStime_dataset = [];
+            deathsVStime_dataset = [];
+            recoveriesVStime_dataset = [];
+
+            keys.forEach(date => {
+                let datapoint = {x: data[date]["samples"], y: data[date]["tested_positive"]};
+                positivesVSsampled_dataset.push(datapoint);
+                datapoint = {x: new Date(date.replace(/-/g, '/')), y: data[date]["tested_positive"]};
+                positivesVStime_dataset.push(datapoint);
+                datapoint = {x: new Date(date.replace(/-/g, '/')), y: data[date]["deaths"]};
+                deathsVStime_dataset.push(datapoint);
+                datapoint = {x: new Date(date.replace(/-/g, '/')), y: data[date]["discharges"]};
+                recoveriesVStime_dataset.push(datapoint);
+            });
+
+
+            var ctx = document.getElementById('MortalityGraph').getContext('2d');
+            var MortalityGraphChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            data: positivesVStime_dataset,
+                            label: "Tested Positive",
+                            borderColor: "yellow",
+                            fill: 'origin',
+                            fillColor : "yellow",
+                        },
+                        {
+                            data: deathsVStime_dataset,
+                            label: "Deaths",
+                            borderColor: "red",
+                            fill: 'origin',
+                        },
+                        {
+                            data: recoveriesVStime_dataset,
+                            label: "Recoveries",
+                            borderColor: "green",
+                            fill: 'origin',
+                        },
+
+                    ]
+                },
+                options: {
+                    plugins: {
+                        filler: {
+                            propagate: true
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            fontColor: 'black'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'COVID-19 Mortality vs. Time',
+                        fontSize: 18,
+                        fontColor: 'black',
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Number of People',
+                                fontColor: 'black',
+                            },
+                            ticks: {
+                                beginAtZero:true,
+                                fontColor: 'black'
+                            },
+                        }],
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                displayFormats: {
+                                    quarter: 'MMM D'
+                                }
+                            },
+                            ticks: {
+                                fontColor: 'black',
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Date',
+                                fontColor: 'black',
+                            },
+                        }]
+                    },
+                    responsive: true
+                }
+            });
+
+
+            var ctx = document.getElementById('PositivesVsSampled').getContext('2d');
+            var PositivesVsSampledChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        data: positivesVSsampled_dataset,
+                        label: "Tested Positive",
+                        borderColor: "yellow",
+                        fill: 'origin',
+                    }]
+                },
+                options: {
+                    legend: {
+                        labels: {
+                            fontColor: 'black'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'COVID-19 Spread vs. Samples Taken',
+                        fontSize: 18,
+                        fontColor: 'black',
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Tested Positive',
+                                fontColor: 'black',
+                            },
+                            ticks: {
+                                beginAtZero:true,
+                                fontColor: 'black'
+                            },
+                        }],
+                        xAxes: [{
+                            type: 'linear',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Samples',
+                                fontColor: 'black',
+                            },
+                            ticks: {
+                                fontColor: 'black'
+                            },
+                        }]
+                    },
+                    responsive: true
+                }
+            });
+
+            var ctx = document.getElementById('PositivesVsTime').getContext('2d');
+            var PositivesVsTimeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        data: positivesVStime_dataset,
+                        label: "Tested Positive",
+                        borderColor: "yellow",
+                        fill: 'origin',
+                    }]
+                },
+                options: {
+                    legend: {
+                        labels: {
+                            fontColor: 'black'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'COVID-19 Spread vs. Time',
+                        fontSize: 18,
+                        fontColor: 'black',
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Tested Positive',
+                                fontColor: 'black',
+                            },
+                            ticks: {
+                                beginAtZero:true,
+                                fontColor: 'black'
+                            },
+                        }],
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                displayFormats: {
+                                    quarter: 'MMM D'
+                                }
+                            },
+                            ticks: {
+                                fontColor: 'black',
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Date',
+                                fontColor: 'black',
+                            },
+                        }]
+                    },
+                    responsive: true
+                }
+            });
+        }
+    </script>
+    
+    <script>
+        function load_elem(key, val) {
+            let mapper = {
+                "samples": "sample-value",
+                "tested_positive": "positive-value",
+                "deaths": "death-value",
+                "discharges": "recovered-value",
+                "MoH_report_num": "report-number",
+                "report_date": "report-date"
+            };
+
+            if (Object.keys(mapper).includes(key)) {
+                let reference_elem = document.getElementById(mapper[key]);
+                if (!val) return;
+                if (key == "report_date") reference_elem.textContent = "Report Released: " + val.toUpperCase();
+                else reference_elem.textContent = val.toString();
+            }
+        }
+
+        async function fetchCovidData () {
+            let response = await fetch('https://covid.reticence.net/all');
+            let data = await response.json();
+            let keys = Object.keys(data);
+            if (keys.length > 0) {
+                let newest_data = keys.sort().slice(-1);
+                let data_fields = Object.keys(data[newest_data]);
+                data_fields.forEach(field_name => {
+                    load_elem(field_name, data[newest_data][field_name]);
+                });
+                load_charts(data);
+                return data;
+            }
+            else {
+                alert("An Error has occurred in fetching data.");
+            }
+        }
+        fetchCovidData();
+    </script>
+</body>
+</html>
