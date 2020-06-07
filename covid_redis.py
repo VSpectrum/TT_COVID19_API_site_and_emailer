@@ -18,10 +18,10 @@ def store_to_redis(redkey, data):
     conn.hmset(redkey, data)
 
 def fetch_and_store_report_images(month, day):
-    base_url = 'http://www.health.gov.tt/images_cms/2020/CoronaVirus/MediaReleases'
+    base_url = 'http://www.health.gov.tt/covid19/MediaReleases'
     report_url_variations = [
-        f'{base_url}/{month}/{month[:3]}{day}-01.jpg',
-        f'{base_url}/{month}/{month[:3]}{day}.jpg',
+        f'{base_url}/{month[:3]}{day}-01.jpg',
+        f'{base_url}/{month[:3]}{day}.jpg',
     ]
     for report_url in report_url_variations:
         report_request = requests.get(report_url)
@@ -105,6 +105,8 @@ def email_data_formatted(data):
     </table>
     <br>
     <a href="https://covid.reticence.net/">Link to site with charts</a>
+    <br><br><br>
+    <a href="https://covid.reticence.net/unsubscribe">Unsubscribe here</a>
     """
     return formatted
 

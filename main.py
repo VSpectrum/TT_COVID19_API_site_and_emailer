@@ -31,7 +31,7 @@ async def get_all():
 async def get_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request,})
 
-@app.get("/subscribe")
+@app.get("/unsubscribe")
 async def subscribe_email(request: Request):
     return templates.TemplateResponse("sub.html", {"request": request,})
 

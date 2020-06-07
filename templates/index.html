@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>Trinidad and Tobago COVID19 Report</title>
     <style>
         @font-face {
             font-family: CrimsonFont;
@@ -42,6 +42,18 @@
             margin-bottom: 2px;
         }
     </style>
+    <meta name="title" content="Trinidad and Tobago COVID-19 Report" />
+    <meta name="description" content="Trinidad and Tobago COVID-19 Report obtained from Ministry of Health directly COVID19 covid" />
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145123398-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-145123398-2');
+    </script>
+    
 </head>
 
 <body>
@@ -86,6 +98,26 @@
 
             <div class="col-md-4">
                 <canvas id="PositivesVsTime" width="400" height="400" style="background-color: rgb(241, 241, 241);"></canvas>
+            </div>
+        </div>
+        <hr>
+        <form method="get" action="/subscribe/" method="get" class="form-inline validate">
+            <div class="row">
+                <div class="col-md-offset-4">
+                    <div class="form-group">
+                        <label for="email">Email address for LIVE alerts:</label>
+                        <input type="email" id="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="your_email_addr@gmail.com" required>
+                    </div>
+                    <div class="form-group col-md-offset-0 col-xs-offset-5">
+                        <input type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <hr>
+        <div class="row">
+            <div class="col-md-offset-11 col-xs-offset-5">
+                <a id="data-source-url" href=''>Data Source</a>
             </div>
         </div>
     </div>
@@ -317,6 +349,16 @@
                 if (!val) return;
                 if (key == "report_date") reference_elem.textContent = "Report Released: " + val.toUpperCase();
                 else reference_elem.textContent = val.toString();
+            }
+            
+            if (key == "report_date") {
+                let date = new Date(val);
+                let month = date.toLocaleString('default', { month: 'long' });
+                let day = date.getDate();
+                let year = date.getFullYear()
+                let data_source_url = `http://www.health.gov.tt/covid19/MediaReleases/${month.substring(0,3)}${day}-01.jpg`;
+                document.getElementById("data-source-url").href = data_source_url
+                
             }
         }
 

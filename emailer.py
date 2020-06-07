@@ -17,7 +17,8 @@ def send_email(recipient, subject, text_body = None, html_body = None, attachmen
     msg = MIMEMultipart('alternative')
     msg['Subject'] = SUBJECT
     msg['From'] = FROM
-    msg['To'] = 'covid-tt subscribed list'
+    msg['To'] = 'veydh@reticence.net'
+    msg.add_header('List-Unsubscribe', 'https://covid.reticence.net/unsubscribe')
 
     msg.preamble = 'Multipart massage.\n'
     if (text_body): msg.attach(MIMEText(text_body, 'plain'))
