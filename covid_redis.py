@@ -13,16 +13,21 @@ IMAGE_DIR = 'report-images'
 
 reference_date = datetime.datetime.now()
 
-def store_to_redis(redkey, data):
-    conn = redis.Redis('localhost', password=config.redis_passwd)
-    conn.hmset(redkey, data)
-
-def fetch_and_store_report_images(month, day):
+def generate_source_info_urls(month, day):
     base_url = 'http://www.health.gov.tt/covid19/MediaReleases'
     report_url_variations = [
         f'{base_url}/{month[:3]}{day}-01.jpg',
         f'{base_url}/{month[:3]}{day}.jpg',
     ]
+    report_url_variations = ["http://www.health.gov.tt/covid19/MediaReleases/ReleaseNew-01.jpg"]
+    return report_url_variations
+
+def store_to_redis(redkey, data):
+    conn = redis.Redis('localhost', password=config.redis_passwd)
+    conn.hmset(redkey, data)
+
+def fetch_and_store_report_images(month, day):
+    report_url_variations = generate_source_info_urls(month, day)
     for report_url in report_url_variations:
         report_request = requests.get(report_url)
         if report_request.status_code == 200:
@@ -39,7 +44,7 @@ def fetch_and_store_report_images(month, day):
         else:
             print(f'{report_url} 404')
     return False
-                
+
 def parse_report_image_to_text(filename):
     image = PIL.Image.open(f'{IMAGE_DIR}/{filename}')
     image_text = pytesseract.image_to_string(image).lower().replace('covid-19', '')
